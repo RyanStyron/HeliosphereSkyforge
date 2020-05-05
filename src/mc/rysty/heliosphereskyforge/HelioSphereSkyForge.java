@@ -9,7 +9,6 @@ import mc.rysty.heliosphereskyforge.island.NoBlockModify;
 import mc.rysty.heliosphereskyforge.island.PlayerJoin;
 import mc.rysty.heliosphereskyforge.modifications.CobbleGenerationModifier;
 import mc.rysty.heliosphereskyforge.setup.SkyForgeCommandWhitelist;
-import mc.rysty.heliosphereskyforge.setup.SkyForgeSpawnAdjust;
 import mc.rysty.heliosphereskyforge.setup.SkyForgeSpawnNoBuild;
 import mc.rysty.heliosphereskyforge.utils.SettingsManager;
 
@@ -29,7 +28,7 @@ public class HelioSphereSkyForge extends JavaPlugin {
 		SettingsManager.getInstance().setup(this);
 
 		new IslandCommand(this);
-		pm.registerEvents(new SkyForgeSpawnAdjust(), this);
+		//pm.registerEvents(new SkyForgeSpawnAdjust(), this);
 		pm.registerEvents(new SkyForgeCommandWhitelist(), this);
 		pm.registerEvents(new SkyForgeSpawnNoBuild(), this);
 		pm.registerEvents(new PlayerJoin(), this);
