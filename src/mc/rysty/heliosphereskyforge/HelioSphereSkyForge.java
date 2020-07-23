@@ -28,7 +28,6 @@ public class HelioSphereSkyForge extends JavaPlugin {
 		SettingsManager.getInstance().setup(this);
 
 		new IslandCommand(this);
-		//pm.registerEvents(new SkyForgeSpawnAdjust(), this);
 		pm.registerEvents(new SkyForgeCommandWhitelist(), this);
 		pm.registerEvents(new SkyForgeSpawnNoBuild(), this);
 		pm.registerEvents(new PlayerJoin(), this);
