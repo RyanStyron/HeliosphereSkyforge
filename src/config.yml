@@ -1,41 +1,39 @@
-#Permissions:
-# - hs.skyforge.adminwarp
+console_error_message: "&c&l(!)&f This command can only be ran by players"
+player_offline_message: "&c&l(!)&f Could not find the specified player"
+too_many_args_error: "&c&l(!)&f Too many arguments were provided"
+argument-error: "&c&l(!)&f A valid amount of arguments must be provided. Usage: <usage>"
+console_player_error_message: "&c&l(!)&f You can only specify an online player"
+no_perm_message: "&c&l(!)&f You do not have permission to do this"
 
-console_error_message: "&b&l>>&7 &cThis command can only be ran by players"
-player_offline_message: "&b&l>>&7 &cCould not find the specified player"
-too_many_args_error: "&b&l>>&7 &cToo many arguments were provided"
-console_player_error_message: "&b&l>>&7 &cYou can only specify an online player"
-no_perm_message: "&b&l>>&7 &cYou do not have permission to do this"
+no_block_modify: "&c&l(!)&f You cannot modify blocks out of your island"
+modify_other_island: "&6&l(!)&f You are modifying blocks off of your island"
 
-no_block_modify: "&b&l>>&7 &cYou cannot modify blocks out of your island"
-modify_other_island: "&b&l>>&7 You are modifying blocks off of your island"
-
-teleported_world_message: "&b&l>>&7 &7Warping to <world>..."
-teleported_spawn_message: "&b&l>>&7 &7Warping to <world>&7's Spawn..."
-world_command_error: "&b&l>>&7 &cThis command can not be executed in <world>"
+teleported_world_message: "&6&l(!)&f Warping to &b<world>&f..."
+teleported_spawn_message: "&6&l(!)&f Warping to &b<world>&f's Spawn..."
+world_command_error: "&c&l(!)&f This command can not be executed in &b<world>&f."
 
 Spawn:
-  no_block_modify: "&b&l>>&7 &cYou cannot modify blocks in this gamemode"
+  no_block_modify: "&c&l(!)&f You cannot modify blocks in this gamemode"
 
 IslandCommand:
-  not_enough_args: "&b&l>>&7 &cNot enough arguments were provided! Accepted arguments: home, create, delete, retrieve, warp"
-  improper_arg_error: "&b&l>>&7 &cThe argument provided could not be accepted! Accepted arguments: home, create, delete, retrieve, warp"
+  not_enough_args: "&c&l(!)&f Not enough arguments were provided! Accepted arguments: home, create, delete, retrieve, warp"
+  improper_arg_error: "&c&l(!)&f The argument provided could not be accepted! Accepted arguments: home, create, delete, retrieve, warp"
   
-  admin_warp_message: "&b&l>>&7 Warping to <target>'s island..."
-  admin_warp_command_error: "&b&l>>&7 &cNot enough arguments were provided! Correct format: /island adminwarp <player>"
-  admin_warp_island_error: "&b&l>>&7 &cThe specified player does not have an island"
+  admin_warp_message: "&6&l(!)&f Warping to &e<target>&f's island..."
+  admin_warp_command_error: "&c&l(!)&f Not enough arguments were provided! Correct format: /island adminwarp <player>"
+  admin_warp_island_error: "&c&l(!)&f The specified player does not have an island"
   
-  island_create_message: "&b&l>>&7 Your island has been created. Type &3/island home&7 to travel to your island."
-  island_created_old_deleted: "&b&l>>&7 Your new island has been created and we have deleted your old one."
-  island_create_error: "&b&l>>&7 &cYou already have an island! Type &3/island delete&c to remove it."
+  island_create_message: "&a&l(!)&f Your island has been created. Type /island home to travel to your island."
+  island_created_old_deleted: "&6&l(!)&f Your new island has been created and we have deleted your old one."
+  island_create_error: "&c&l(!)&f You already have an island! Type /island delete to remove it."
   
-  deleted_island_message: "&b&l>>&7 Your island has been deleted. If you wish to retrieve your deleted island, type &3/island retrieve&7. If you create a new island, your old one will be removed cannot be restored."
-  delete_island_error: "&b&l>>&7 &cYou do not have an island to be deleted"
-  deleted_island_already_deleted: "&b&l>>&7 &cYou have already deleted your island! Type &3/island retrieve&c to get it back, or &3/island create&c to make a new one"
+  deleted_island_message: "&a&l(!)&f Your island has been deleted. If you wish to retrieve your deleted island, type /island retrieve. If you create a new island, your old one will be removed cannot be restored."
+  delete_island_error: "&c&l(!)&f You do not have an island to be deleted."
+  deleted_island_already_deleted: "&c&l(!)&f You have already deleted your island! Type /island retrieve to get it back, or /island create to make a new one"
   
-  island_home_message: "&b&l>>&7 Warping to your island..."
-  island_home_null_message: "&b&l>>&7 &cYou do not have an island to teleport to! Type &3/island create&c to make one."
-  island_home_deleted_message: "&b&l>>&7 &cYour island is currently deleted. Type &3/island retrieve&c to revive your one, type &3/island create&c to make a new island."
+  island_home_message: "&6&l(!)&f Warping to your island..."
+  island_home_null_message: "&c&l(!)&f You do not have an island to teleport to! Type /island create to make one."
+  island_home_deleted_message: "&c&l(!)&f Your island is currently deleted. Type /island retrieve to revive your one, type /island create to make a new island."
   
-  island_retrieve_message: "&b&l>>&7 Your island has been retrieved! Type &3/island home&7 to travel to it"
-  island_retrieve_error: "&b&l>>&7 &cYou do not have a deleted island to be retrieved!"
+  island_retrieve_message: "&a&l(!)&f Your island has been retrieved! Type /island home to travel to it"
+  island_retrieve_error: "&c&l(!)&f You do not have a deleted island to be retrieved!"
