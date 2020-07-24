@@ -49,7 +49,6 @@ public class IslandBlockEvents implements Listener {
 	}
 
 	private void noBlockModify(Player player, Event event) {
-		String eventName = event.getEventName();
 		UUID playerId = player.getUniqueId();
 		Location location = player.getLocation();
 		World world = location.getWorld();
@@ -65,32 +64,29 @@ public class IslandBlockEvents implements Listener {
 					if (location.distanceSquared(world.getSpawnLocation()) >= 2500) {
 						if (!player.hasPermission("hs.skyforge.modifyIslandOther")) {
 							MessageUtils.configStringMessage(player, "no_block_modify");
-
-							if (eventName.equalsIgnoreCase("BlockBreakEvent"))
-								((BlockBreakEvent) event).setCancelled(true);
-							else if (eventName.equalsIgnoreCase("BlockPlaceEvent"))
-								((BlockPlaceEvent) event).setCancelled(true);
-							else if (eventName.equalsIgnoreCase("PlayerBucketEmptyEvent"))
-								((PlayerBucketEmptyEvent) event).setCancelled(true);
-							else if (eventName.equalsIgnoreCase("PlayerBucketFillEvent"))
-								((PlayerBucketFillEvent) event).setCancelled(true);
+							cancelEvent(event);
 						}
 					}
 				}
 			} else if (location.distanceSquared(world.getSpawnLocation()) >= 2500) {
 				if (!player.hasPermission("hs.skyforge.modifyIslandOther")) {
 					MessageUtils.configStringMessage(player, "no_block_modify");
-
-					if (eventName.equalsIgnoreCase("BlockBreakEvent"))
-						((BlockBreakEvent) event).setCancelled(true);
-					else if (eventName.equalsIgnoreCase("BlockPlaceEvent"))
-						((BlockPlaceEvent) event).setCancelled(true);
-					else if (eventName.equalsIgnoreCase("PlayerBucketEmptyEvent"))
-						((PlayerBucketEmptyEvent) event).setCancelled(true);
-					else if (eventName.equalsIgnoreCase("PlayerBucketFillEvent"))
-						((PlayerBucketFillEvent) event).setCancelled(true);
+					cancelEvent(event);
 				}
 			}
 		}
+	}
+
+	private void cancelEvent(Event event) {
+		String eventName = event.getEventName();
+
+		if (eventName.equalsIgnoreCase("BlockBreakEvent"))
+			((BlockBreakEvent) event).setCancelled(true);
+		else if (eventName.equalsIgnoreCase("BlockPlaceEvent"))
+			((BlockPlaceEvent) event).setCancelled(true);
+		else if (eventName.equalsIgnoreCase("PlayerBucketEmptyEvent"))
+			((PlayerBucketEmptyEvent) event).setCancelled(true);
+		else if (eventName.equalsIgnoreCase("PlayerBucketFillEvent"))
+			((PlayerBucketFillEvent) event).setCancelled(true);
 	}
 }
