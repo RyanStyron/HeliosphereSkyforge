@@ -1,5 +1,7 @@
 package mc.rysty.heliosphereskyforge.commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -8,6 +10,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -16,13 +19,14 @@ import mc.rysty.heliosphereskyforge.island.IslandSetup;
 import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
 import mc.rysty.heliosphereskyforge.utils.MessageUtils;
 
-public class IslandCommand implements CommandExecutor {
+public class IslandCommand implements CommandExecutor, TabCompleter {
 
 	private IslandsFileManager islandsFileManager = HelioSphereSkyForge.islandsFileManager;
 	private FileConfiguration islandsFile = islandsFileManager.getData();
 
 	public IslandCommand(HelioSphereSkyForge plugin) {
 		plugin.getCommand("island").setExecutor(this);
+		plugin.getCommand("island").setTabCompleter(this);
 	}
 
 	@Override
@@ -128,5 +132,29 @@ public class IslandCommand implements CommandExecutor {
 				MessageUtils.consoleError();
 		}
 		return false;
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+		if (args.length == 1) {
+			List<String> completions = new ArrayList<>();
+
+			completions.add("create");
+			completions.add("home");
+			completions.add("delete");
+			completions.add("warp");
+			completions.add("retrieve");
+			if (sender.hasPermission("hs.skyforge.adminwarp"))
+				completions.add("adminwarp");
+
+			return completions;
+		} else if (args.length == 2 && args[0].equalsIgnoreCase("adminwarp")) {
+			List<String> players = new ArrayList<>();
+
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers())
+				players.add(onlinePlayer.getName());
+			return players;
+		}
+		return null;
 	}
 }
