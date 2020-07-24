@@ -1,16 +1,14 @@
 package mc.rysty.heliosphereskyforge;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import mc.rysty.heliosphereskyforge.commands.IslandCommand;
-import mc.rysty.heliosphereskyforge.island.NoBlockModify;
-import mc.rysty.heliosphereskyforge.island.PlayerJoin;
+import mc.rysty.heliosphereskyforge.island.IslandBlockEvents;
 import mc.rysty.heliosphereskyforge.modifications.CobbleGenerationModifier;
 import mc.rysty.heliosphereskyforge.setup.SkyForgeCommandWhitelist;
-import mc.rysty.heliosphereskyforge.setup.SkyForgeSpawnNoBuild;
-import mc.rysty.heliosphereskyforge.utils.SettingsManager;
+import mc.rysty.heliosphereskyforge.setup.SkyForgeSpawn;
+import mc.rysty.heliosphereskyforge.setup.UpdateIslandsYAML;
+import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
 
 public class HelioSphereSkyForge extends JavaPlugin {
 
@@ -20,25 +18,28 @@ public class HelioSphereSkyForge extends JavaPlugin {
 		return plugin;
 	}
 
-	PluginManager pm = Bukkit.getPluginManager();
+	public static IslandsFileManager islandsFileManager = IslandsFileManager.getInstance();
 
 	public void onEnable() {
 		plugin = this;
 		saveDefaultConfig();
-		SettingsManager.getInstance().setup(this);
+		islandsFileManager.setup(this);
 
+		/* Commands. */
 		new IslandCommand(this);
-		pm.registerEvents(new SkyForgeCommandWhitelist(), this);
-		pm.registerEvents(new SkyForgeSpawnNoBuild(), this);
-		pm.registerEvents(new PlayerJoin(), this);
-		pm.registerEvents(new NoBlockModify(), this);
-		pm.registerEvents(new CobbleGenerationModifier(), this);
+
+		/* Listeners. */
+		new SkyForgeSpawn(this);
+		new SkyForgeCommandWhitelist(this);
+		new CobbleGenerationModifier(this);
+		new UpdateIslandsYAML(this);
+		new IslandBlockEvents(this);
 
 		System.out.println("HS-SkyForge enabled");
 	}
 
 	public void onDisable() {
-		SettingsManager.getInstance().saveData();
+		islandsFileManager.saveData();
 		System.out.println("HS-SkyForge disabled");
 	}
 }
