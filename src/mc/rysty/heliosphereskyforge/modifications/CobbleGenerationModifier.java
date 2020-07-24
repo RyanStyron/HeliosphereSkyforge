@@ -9,37 +9,39 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 
+import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
+
 public class CobbleGenerationModifier implements Listener {
+
+	public CobbleGenerationModifier(HelioSphereSkyForge plugin) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
+
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onFromTo(BlockFromToEvent event) {
-		if (event.getBlock().getWorld().getName().equalsIgnoreCase("SkyForge")) {
-			if (event.getBlock() != null) {
-				Block block = event.getBlock();
+		Block block = event.getBlock();
 
-				if (block.getType() != null) {
-					Material material = block.getType();
+		if (block.getWorld().getName().equalsIgnoreCase("SkyForge")) {
+			if (block.getType() != null) {
+				Material material = block.getType();
 
-					if (material == Material.WATER || material == Material.LEGACY_STATIONARY_WATER
-							|| material == Material.LAVA || material == Material.LEGACY_STATIONARY_LAVA) {
-						Block toBlock = event.getToBlock();
+				if (material == Material.WATER || material == Material.LEGACY_STATIONARY_WATER
+						|| material == Material.LAVA || material == Material.LEGACY_STATIONARY_LAVA) {
+					Block toBlock = event.getToBlock();
 
-						if (toBlock.getType() == Material.AIR) {
-							if (generatesCobble(material, toBlock)) {
-								event.setCancelled(true);
-								Random random = new Random();
-								int percent = random.nextInt(100);
+					if (toBlock.getType() == Material.AIR) {
+						if (generatesCobble(material, toBlock)) {
+							event.setCancelled(true);
+							Random random = new Random();
+							int percent = random.nextInt(100);
 
-								if (percent >= 30 && percent < 101) {
-									toBlock.setType(Material.COBBLESTONE);
-								}
-								if (percent >= 10 && percent < 30) {
-									toBlock.setType(Material.COAL_ORE);
-								}
-								if (percent >= 0 && percent < 10) {
-									toBlock.setType(Material.IRON_ORE);
-								}
-							}
+							if (percent >= 30 && percent < 101)
+								toBlock.setType(Material.COBBLESTONE);
+							else if (percent >= 10 && percent < 30)
+								toBlock.setType(Material.COAL_ORE);
+							else if (percent >= 0 && percent < 10)
+								toBlock.setType(Material.IRON_ORE);
 						}
 					}
 				}
@@ -61,9 +63,8 @@ public class CobbleGenerationModifier implements Listener {
 		for (BlockFace face : faces) {
 			Block relative = block.getRelative(face, 1);
 
-			if (relative.getType() == mirrorID1 || relative.getType() == mirrorID2) {
+			if (relative.getType() == mirrorID1 || relative.getType() == mirrorID2)
 				return true;
-			}
 		}
 		return false;
 	}
