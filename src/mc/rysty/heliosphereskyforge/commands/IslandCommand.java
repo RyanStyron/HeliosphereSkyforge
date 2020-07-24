@@ -39,37 +39,33 @@ public class IslandCommand implements CommandExecutor {
 
 				if (world.equals(Bukkit.getWorld("Skyforge"))) {
 					if (args.length >= 1) {
+						String islandStatus = islandsFile.getString("islands." + playerId + ".status");
+
 						if (args[0].equalsIgnoreCase("create")) {
-							if (islandsFile.getString("islands." + playerId) == null) {
+							if (islandStatus == null) {
 								IslandSetup.createIsland(playerId);
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_create_message");
-							} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted") {
-								xCoord = islandsFile.getDouble("islands." + playerId + ".location.x");
-								yCoord = islandsFile.getDouble("islands." + playerId + ".location.y");
-								zCoord = islandsFile.getDouble("islands." + playerId + ".location.z");
-								Location islandLocation = new Location(world, xCoord, yCoord, zCoord);
-
-								IslandSetup.deleteIsland(player, islandLocation);
+							} else if (islandStatus.equalsIgnoreCase("deleted")) {
 								islandsFile.set("islands." + playerId, null);
 								islandsFileManager.saveData();
 								IslandSetup.createIsland(playerId);
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_created_old_deleted");
-							} else if (islandsFile.getString("islands." + playerId + ".status") == "current")
+							} else
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_create_error");
 						} else if (args[0].equalsIgnoreCase("delete")) {
-							if (islandsFile.getString("islands." + playerId + ".status") != null) {
-								if (islandsFile.getString("islands." + playerId + ".status") == "current") {
+							if (islandStatus != null) {
+								if (islandStatus.equalsIgnoreCase("current")) {
 									islandsFile.set("islands." + playerId + ".status", "deleted");
 									islandsFileManager.saveData();
 									player.teleport(world.getSpawnLocation());
 									MessageUtils.configStringMessage(sender, "IslandCommand.deleted_island_message");
-								} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted")
+								} else
 									MessageUtils.configStringMessage(sender,
 											"IslandCommand.deleted_island_already_deleted");
 							} else
 								MessageUtils.configStringMessage(sender, "IslandCommand.delete_island_error");
 						} else if (args[0].equalsIgnoreCase("home") || args[0].equalsIgnoreCase("h")) {
-							if (islandsFile.getString("islands." + playerId + ".status") == "current") {
+							if (islandStatus.equalsIgnoreCase("current")) {
 								xCoord = islandsFile.getDouble("islands." + playerId + ".location.x");
 								yCoord = islandsFile.getDouble("islands." + playerId + ".location.y");
 								zCoord = islandsFile.getDouble("islands." + playerId + ".location.z");
@@ -78,13 +74,13 @@ public class IslandCommand implements CommandExecutor {
 								player.teleport(playerIslandSpawn);
 								player.teleport(world.getHighestBlockAt(playerIslandSpawn).getLocation().add(0, 1, 0));
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_message");
-							} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted")
+							} else if (islandStatus.equalsIgnoreCase("deleted")) {
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_deleted_message");
-							else if (islandsFile.getString("islands." + playerId + ".status") == null)
+							} else
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_null_message");
 						} else if (args[0].equalsIgnoreCase("warp")) {
 						} else if (args[0].equalsIgnoreCase("retrieve")) {
-							if (islandsFile.getString("islands." + playerId + ".status") == "deleted") {
+							if (islandStatus.equalsIgnoreCase("deleted")) {
 								islandsFile.set("islands." + playerId + ".status", "current");
 								islandsFileManager.saveData();
 								MessageUtils.configStringMessage(sender, "IslandCommand.island_retrieve_message");
@@ -97,29 +93,29 @@ public class IslandCommand implements CommandExecutor {
 								else if (args.length > 1) {
 									Player target = Bukkit.getPlayer(args[1]);
 
-									if (target == null) {
-										MessageUtils.configStringMessage(sender, "player_offline_message");
-										return false;
-									}
-									UUID targetId = target.getUniqueId();
+									if (target != null) {
+										UUID targetId = target.getUniqueId();
 
-									if (islandsFile.getString("islands." + targetId) == null) {
-										MessageUtils.configStringMessage(sender,
-												"IslandCommand.admin_warp_command_error");
-										return false;
-									} else if (islandsFile.getString("islands." + targetId + ".status") == "current") {
-										xCoord = islandsFile.getDouble("islands." + targetId + ".location.x");
-										yCoord = islandsFile.getDouble("islands." + targetId + ".location.y");
-										zCoord = islandsFile.getDouble("islands." + targetId + ".location.z");
-										Location islandLocation = new Location(world, xCoord, yCoord, zCoord);
+										if (islandsFile.getString("islands." + targetId) == null) {
+											MessageUtils.configStringMessage(sender,
+													"IslandCommand.admin_warp_command_error");
+											return false;
+										} else if (islandStatus.equalsIgnoreCase("current")) {
+											xCoord = islandsFile.getDouble("islands." + targetId + ".location.x");
+											yCoord = islandsFile.getDouble("islands." + targetId + ".location.y");
+											zCoord = islandsFile.getDouble("islands." + targetId + ".location.z");
+											Location islandLocation = new Location(world, xCoord, yCoord, zCoord);
 
-										player.teleport(islandLocation);
-										player.teleport(world.getHighestBlockAt(islandLocation).getLocation().add(0, 1, 0));
-										MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_message",
-												"<target>", target.getDisplayName());
-									} else if (islandsFile.getString("islands." + targetId + ".status") == "deleted")
-										MessageUtils.configStringMessage(sender,
-												"IslandCommand.admin_warp_command_error");
+											player.teleport(islandLocation);
+											player.teleport(
+													world.getHighestBlockAt(islandLocation).getLocation().add(0, 1, 0));
+											MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_message",
+													"<target>", target.getDisplayName());
+										} else if (islandStatus.equalsIgnoreCase("deleted"))
+											MessageUtils.configStringMessage(sender,
+													"IslandCommand.admin_warp_command_error");
+									} else
+										MessageUtils.validPlayerError(sender);
 								}
 							} else
 								MessageUtils.noPermissionError(sender);
