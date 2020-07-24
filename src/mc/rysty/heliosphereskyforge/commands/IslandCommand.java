@@ -13,15 +13,13 @@ import org.bukkit.entity.Player;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
 import mc.rysty.heliosphereskyforge.island.IslandSetup;
-import mc.rysty.heliosphereskyforge.utils.SettingsManager;
-import mc.rysty.heliosphereskyforge.utils.Utils;
+import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
+import mc.rysty.heliosphereskyforge.utils.MessageUtils;
 
 public class IslandCommand implements CommandExecutor {
 
-	private HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
-	private FileConfiguration config = plugin.getConfig();
-	private SettingsManager settings = SettingsManager.getInstance();
-	private FileConfiguration data = settings.getData();
+	private IslandsFileManager islandsFileManager = HelioSphereSkyForge.islandsFileManager;
+	private FileConfiguration islandsFile = islandsFileManager.getData();
 
 	public IslandCommand(HelioSphereSkyForge plugin) {
 		plugin.getCommand("island").setExecutor(this);
@@ -31,150 +29,107 @@ public class IslandCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (command.getName().equalsIgnoreCase("island")) {
 			if (sender instanceof Player) {
-				Player p = (Player) sender;
-				UUID pId = p.getUniqueId();
-				String noPermMessage = Utils.chat(config.getString("no_perm_message"));
-				String player_offline_message = Utils.chat(config.getString("player_offline_message"));
-				String island_create_error = Utils.chat(config.getString("IslandCommand.island_create_error"));
-				String island_create_message = Utils.chat(config.getString("IslandCommand.island_create_message"));
-				String island_created_old_deleted = Utils
-						.chat(config.getString("IslandCommand.island_created_old_deleted"));
-				String delete_island_error = Utils.chat(config.getString("IslandCommand.delete_island_error"));
-				String deleted_island_message = Utils.chat(config.getString("IslandCommand.deleted_island_message"));
-				String deleted_island_already_deleted = Utils
-						.chat(config.getString("IslandCommand.deleted_island_already_deleted"));
-				String admin_warp_message = Utils.chat(config.getString("IslandCommand.admin_warp_message"));
-				String admin_warp_command_error = Utils
-						.chat(config.getString("IslandCommand.admin_warp_command_error"));
-				String admin_warp_island_error = Utils.chat(config.getString("IslandCommand.admin_warp_island_error"));
-				String island_home_message = Utils.chat(config.getString("IslandCommand.island_home_message"));
-				String island_home_deleted_message = Utils
-						.chat(config.getString("IslandCommand.island_home_deleted_message"));
-				String island_home_null_message = Utils
-						.chat(config.getString("IslandCommand.island_home_null_message"));
-				String island_retrieve_message = Utils.chat(config.getString("IslandCommand.island_retrieve_message"));
-				String island_retrieve_error = Utils.chat(config.getString("IslandCommand.island_retrieve_error"));
-				String not_enough_args_message = Utils.chat(config.getString("IslandCommand.not_enough_args"));
-				String improper_arg_error = Utils.chat(config.getString("IslandCommand.improper_arg_error"));
-				World skyforge = Bukkit.getWorld("Skyforge");
-				double pX;
-				double pY;
-				double pZ;
+				Player player = (Player) sender;
+				UUID playerId = player.getUniqueId();
+				Location location = player.getLocation();
+				World world = location.getWorld();
+				double xCoord;
+				double yCoord;
+				double zCoord;
 
-				if (p.getWorld().getName().equalsIgnoreCase("Skyforge")) {
+				if (world.equals(Bukkit.getWorld("Skyforge"))) {
 					if (args.length >= 1) {
-						String a0 = args[0];
+						if (args[0].equalsIgnoreCase("create")) {
+							if (islandsFile.getString("islands." + playerId) == null) {
+								IslandSetup.createIsland(playerId);
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_create_message");
+							} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted") {
+								xCoord = islandsFile.getDouble("islands." + playerId + ".location.x");
+								yCoord = islandsFile.getDouble("islands." + playerId + ".location.y");
+								zCoord = islandsFile.getDouble("islands." + playerId + ".location.z");
+								Location islandLocation = new Location(world, xCoord, yCoord, zCoord);
 
-						if (a0.equalsIgnoreCase("create")) {
-							if (data.getString("islands." + pId) == null) {
-								IslandSetup.createIsland(pId);
-								p.sendMessage(island_create_message);
-							} else if (data.getString("islands." + pId + ".status") == "deleted") {
-								pX = data.getDouble("islands." + pId + ".location.x");
-								pY = data.getDouble("islands." + pId + ".location.y");
-								pZ = data.getDouble("islands." + pId + ".location.z");
-								Location islandLocation = new Location(skyforge, pX, pY, pZ);
+								IslandSetup.deleteIsland(player, islandLocation);
+								islandsFile.set("islands." + playerId, null);
+								islandsFileManager.saveData();
+								IslandSetup.createIsland(playerId);
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_created_old_deleted");
+							} else if (islandsFile.getString("islands." + playerId + ".status") == "current")
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_create_error");
+						} else if (args[0].equalsIgnoreCase("delete")) {
+							if (islandsFile.getString("islands." + playerId + ".status") != null) {
+								if (islandsFile.getString("islands." + playerId + ".status") == "current") {
+									islandsFile.set("islands." + playerId + ".status", "deleted");
+									islandsFileManager.saveData();
+									player.teleport(world.getSpawnLocation());
+									MessageUtils.configStringMessage(sender, "IslandCommand.deleted_island_message");
+								} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted")
+									MessageUtils.configStringMessage(sender,
+											"IslandCommand.deleted_island_already_deleted");
+							} else
+								MessageUtils.configStringMessage(sender, "IslandCommand.delete_island_error");
+						} else if (args[0].equalsIgnoreCase("home") || args[0].equalsIgnoreCase("h")) {
+							if (islandsFile.getString("islands." + playerId + ".status") == "current") {
+								xCoord = islandsFile.getDouble("islands." + playerId + ".location.x");
+								yCoord = islandsFile.getDouble("islands." + playerId + ".location.y");
+								zCoord = islandsFile.getDouble("islands." + playerId + ".location.z");
+								Location playerIslandSpawn = new Location(world, xCoord, yCoord, zCoord);
 
-								IslandSetup.deleteIsland(p, islandLocation);
-								data.set("islands." + pId, null);
-								settings.saveData();
-								IslandSetup.createIsland(pId);
-								p.sendMessage(island_created_old_deleted);
-							} else if (data.getString("islands." + pId + ".status") == "current") {
-								p.sendMessage(island_create_error);
-							}
-						} else if (a0.equalsIgnoreCase("delete")) {
-							if (data.getString("islands." + pId + ".status") != null) {
-								if (data.getString("islands." + pId + ".status") == "current") {
-									data.set("islands." + pId + ".status", "deleted");
-									settings.saveData();
-									p.teleport(skyforge.getSpawnLocation());
-									p.sendMessage(deleted_island_message);
-								} else if (data.getString("islands." + pId + ".status") == "deleted") {
-									p.sendMessage(deleted_island_already_deleted);
-								}
-							} else {
-								p.sendMessage(delete_island_error);
-							}
-						} else if (a0.equalsIgnoreCase("home") || a0.equalsIgnoreCase("h")) {
-							if (data.getString("islands." + pId + ".status") == "current") {
-								pX = data.getDouble("islands." + pId + ".location.x");
-								pY = data.getDouble("islands." + pId + ".location.y");
-								pZ = data.getDouble("islands." + pId + ".location.z");
-								Location playerIslandSpawn = new Location(skyforge, pX, pY, pZ);
-
-								p.teleport(playerIslandSpawn);
-								p.teleport(p.getWorld().getHighestBlockAt(p.getLocation()).getLocation().add(0, 1, 0));
-								p.sendMessage(island_home_message);
-							} else if (data.getString("islands." + pId + ".status") == "deleted") {
-								p.sendMessage(island_home_deleted_message);
-							} else if (data.getString("islands." + pId + ".status") == null) {
-								p.sendMessage(island_home_null_message);
-							}
-						} else if (a0.equalsIgnoreCase("warp")) {
-
-						}
-						if (a0.equalsIgnoreCase("retrieve")) {
-							if (data.getString("islands." + pId + ".status") == "deleted") {
-								data.set("islands." + pId + ".status", "current");
-								settings.saveData();
-								p.sendMessage(island_retrieve_message);
-							} else {
-								p.sendMessage(island_retrieve_error);
-							}
-						}
-
-						// island adminwarp command
-						if (a0.equalsIgnoreCase("adminwarp")) {
-							if (p.hasPermission("hs.skyforge.adminwarp")) {
-								if (args.length == 1) {
-									p.sendMessage(admin_warp_command_error);
-									return false;
-								} else if (args.length > 1) {
+								player.teleport(playerIslandSpawn);
+								player.teleport(world.getHighestBlockAt(playerIslandSpawn).getLocation().add(0, 1, 0));
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_message");
+							} else if (islandsFile.getString("islands." + playerId + ".status") == "deleted")
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_deleted_message");
+							else if (islandsFile.getString("islands." + playerId + ".status") == null)
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_home_null_message");
+						} else if (args[0].equalsIgnoreCase("warp")) {
+						} else if (args[0].equalsIgnoreCase("retrieve")) {
+							if (islandsFile.getString("islands." + playerId + ".status") == "deleted") {
+								islandsFile.set("islands." + playerId + ".status", "current");
+								islandsFileManager.saveData();
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_retrieve_message");
+							} else
+								MessageUtils.configStringMessage(sender, "IslandCommand.island_retrieve_error");
+						} else if (args[0].equalsIgnoreCase("adminwarp")) {
+							if (player.hasPermission("hs.skyforge.adminwarp")) {
+								if (args.length == 1)
+									MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_command_error");
+								else if (args.length > 1) {
 									Player target = Bukkit.getPlayer(args[1]);
 
 									if (target == null) {
-										p.sendMessage(player_offline_message);
+										MessageUtils.configStringMessage(sender, "player_offline_message");
 										return false;
 									}
-									UUID tId = target.getUniqueId();
+									UUID targetId = target.getUniqueId();
 
-									if (data.getString("islands." + tId) == null) {
-										p.sendMessage(admin_warp_island_error);
+									if (islandsFile.getString("islands." + targetId) == null) {
+										MessageUtils.configStringMessage(sender,
+												"IslandCommand.admin_warp_command_error");
 										return false;
-									} else if (data
-											.getString("islands." + target.getUniqueId() + ".status") == "current") {
-										pX = data.getDouble("islands." + tId + ".location.x");
-										pY = data.getDouble("islands." + tId + ".location.y");
-										pZ = data.getDouble("islands." + tId + ".location.z");
-										Location islandLocation = new Location(skyforge, pX, pY, pZ);
+									} else if (islandsFile.getString("islands." + targetId + ".status") == "current") {
+										xCoord = islandsFile.getDouble("islands." + targetId + ".location.x");
+										yCoord = islandsFile.getDouble("islands." + targetId + ".location.y");
+										zCoord = islandsFile.getDouble("islands." + targetId + ".location.z");
+										Location islandLocation = new Location(world, xCoord, yCoord, zCoord);
 
-										p.teleport(islandLocation);
-										p.teleport(p.getWorld().getHighestBlockAt(p.getLocation()).getLocation().add(0,
-												1, 0));
-										p.sendMessage(
-												admin_warp_message.replaceAll("<target>", target.getDisplayName()));
-									} else if (data
-											.getString("islands." + target.getUniqueId() + ".status") == "deleted") {
-										p.sendMessage(admin_warp_command_error);
-									}
+										player.teleport(islandLocation);
+										player.teleport(world.getHighestBlockAt(islandLocation).getLocation().add(0, 1, 0));
+										MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_message",
+												"<target>", target.getDisplayName());
+									} else if (islandsFile.getString("islands." + targetId + ".status") == "deleted")
+										MessageUtils.configStringMessage(sender,
+												"IslandCommand.admin_warp_command_error");
 								}
-							} else {
-								p.sendMessage(noPermMessage);
-							}
-						} else if (!(a0.equalsIgnoreCase("home") || a0.equalsIgnoreCase("h")
-								|| a0.equalsIgnoreCase("create") || a0.equalsIgnoreCase("delete")
-								|| a0.equalsIgnoreCase("adminwarp") || a0.equalsIgnoreCase("retrieve")
-								|| a0.equalsIgnoreCase("warp"))) {
-							p.sendMessage(improper_arg_error);
-						}
-					} else if (args.length < 1) {
-						sender.sendMessage(not_enough_args_message);
-					}
+							} else
+								MessageUtils.noPermissionError(sender);
+						} else
+							MessageUtils.configStringMessage(sender, "IslandCommand.improper_arg_error");
+					} else if (args.length < 1)
+						MessageUtils.configStringMessage(sender, "IslandCommand.improper_arg_error");
 				}
-			} else {
-				sender.sendMessage(Utils.chat(config.getString("console_error_message")));
-			}
+			} else
+				MessageUtils.consoleError();
 		}
 		return false;
 	}
