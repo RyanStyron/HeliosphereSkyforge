@@ -27,46 +27,43 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
-import mc.rysty.heliosphereskyforge.utils.SettingsManager;
+import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
 
 public class IslandSetup {
 
+	private static HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
+	private static IslandsFileManager islandsFileManager = HelioSphereSkyForge.islandsFileManager;
+	private static FileConfiguration islandsFile = islandsFileManager.getData();
+
 	public static void createIsland(UUID uuid) {
-		SettingsManager settings = SettingsManager.getInstance();
-		FileConfiguration data = settings.getData();
 		Player player = Bukkit.getPlayer(uuid);
 		String playerName = player.getName();
-		UUID pId = player.getUniqueId();
-		World skyforge = Bukkit.getWorld("SkyForge");
+		UUID playerId = player.getUniqueId();
+		World skyforge = Bukkit.getWorld("Skyforge");
 
 		Random random = new Random();
-		int number = 12345678;
-		int ranInt = random.nextInt(number);
+		int randomInteger = random.nextInt(12345678);
 
-		while (ranInt < 2500) {
-			ranInt = random.nextInt(number);
-		}
-		int ranX = ranInt;
-		int ranZ = ranInt;
+		while (randomInteger < 3000)
+			randomInteger = random.nextInt(12345678);
 
-		data.createSection("islands." + pId);
-		data.set("islands." + pId + ".status", "current");
-		data.set("islands." + pId + ".owner", playerName);
-		data.set("islands." + pId + ".location.x", ranX);
-		data.set("islands." + pId + ".location.y", 65);
-		data.set("islands." + pId + ".location.z", ranZ);
-		settings.saveData();
+		islandsFile.createSection("islands." + playerId);
+		islandsFile.set("islands." + playerId + ".status", "current");
+		islandsFile.set("islands." + playerId + ".owner", playerName);
+		islandsFile.set("islands." + playerId + ".location.x", randomInteger);
+		islandsFile.set("islands." + playerId + ".location.y", 65);
+		islandsFile.set("islands." + playerId + ".location.z", randomInteger);
+		islandsFileManager.saveData();
 
-		double x = data.getDouble("islands." + pId + ".location.x");
-		double y = data.getDouble("islands." + pId + ".location.y");
-		double z = data.getDouble("islands." + pId + ".location.z");
+		double x = islandsFile.getDouble("islands." + playerId + ".location.x");
+		double y = islandsFile.getDouble("islands." + playerId + ".location.y");
+		double z = islandsFile.getDouble("islands." + playerId + ".location.z");
 		Location islandSpawn = new Location(skyforge, x, y, z);
 
-		loadSchematic(islandSpawn);
+		loadNewIslandSchematic(islandSpawn);
 	}
 
-	public static void loadSchematic(Location location) {
-		HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
+	public static void loadNewIslandSchematic(Location location) {
 		File file = new File(plugin.getDataFolder() + File.separator + "SkyForgeIsland.schem");
 		ClipboardFormat format = ClipboardFormats.findByFile(file);
 
@@ -90,7 +87,6 @@ public class IslandSetup {
 	}
 
 	public static void deleteIsland(Player player, Location location) {
-		HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
 		File file = new File(plugin.getDataFolder() + File.separator + "SkyForgeIslandDeleteAir.schem");
 		ClipboardFormat format = ClipboardFormats.findByFile(file);
 
