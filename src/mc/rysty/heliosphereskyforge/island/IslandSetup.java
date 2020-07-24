@@ -85,27 +85,4 @@ public class IslandSetup {
 			e.printStackTrace();
 		}
 	}
-
-	public static void deleteIsland(Player player, Location location) {
-		File file = new File(plugin.getDataFolder() + File.separator + "SkyForgeIslandDeleteAir.schem");
-		ClipboardFormat format = ClipboardFormats.findByFile(file);
-
-		try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
-			Clipboard clipboard = reader.read();
-			com.sk89q.worldedit.world.World world = new BukkitWorld(location.getWorld());
-
-			try (EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(world, -1)) {
-				Operation operation = new ClipboardHolder(clipboard).createPaste(editSession)
-						.to(BlockVector3.at(location.getX(), location.getY(), location.getZ())).ignoreAirBlocks(false)
-						.build();
-				Operations.complete(operation);
-			} catch (WorldEditException e) {
-				e.printStackTrace();
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }
