@@ -1,29 +1,31 @@
 package mc.rysty.heliosphereskyforge.setup;
 
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
-import mc.rysty.heliosphereskyforge.utils.Utils;
+import mc.rysty.heliosphereskyforge.utils.MessageUtils;
 
 public class SkyForgeCommandWhitelist implements Listener {
 
-	private HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
-	private FileConfiguration config = plugin.getConfig();
+	public SkyForgeCommandWhitelist(HelioSphereSkyForge plugin) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
 
 	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent e) {
-		Player p = e.getPlayer();
-		boolean skyforge = p.getWorld().getName().equalsIgnoreCase("SkyForge");
+	public void onCommand(PlayerCommandPreprocessEvent event) {
+		String message = event.getMessage();
+		Player player = event.getPlayer();
+		World world = player.getWorld();
 
-		if (!skyforge) {
-			if (e.getMessage().startsWith("/island") || e.getMessage().startsWith("/is")) {
-				e.setCancelled(true);
-				p.sendMessage(Utils
-						.chat(config.getString("world_command_error").replaceAll("<world>", p.getWorld().getName())));
+		if (!world.equals(Bukkit.getWorld("Skyforge"))) {
+			if (message.startsWith("/island") || message.startsWith("/is")) {
+				event.setCancelled(true);
+				MessageUtils.configStringMessage(player, "world_command_error", "<world>", world.getName());
 			}
 		}
 	}
