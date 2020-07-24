@@ -39,7 +39,6 @@ public class HelioSphereSkyForge extends JavaPlugin {
 	}
 
 	public void onDisable() {
-		islandsFileManager.saveData();
 		System.out.println("HS-SkyForge disabled");
 	}
 }
