@@ -44,7 +44,7 @@ public class IslandSetup {
 		Random random = new Random();
 		int randomInteger = random.nextInt(12345678);
 
-		while (randomInteger < 3000)
+		while (randomInteger < 30000)
 			randomInteger = random.nextInt(12345678);
 
 		islandsFile.createSection("islands." + playerId);
