@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -95,16 +96,19 @@ public class IslandCommand implements CommandExecutor, TabCompleter {
 								if (args.length == 1)
 									MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_command_error");
 								else if (args.length > 1) {
-									Player target = Bukkit.getPlayer(args[1]);
+									@SuppressWarnings("deprecation")
+									OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
 
 									if (target != null) {
+										String targetName = target.getName();
 										UUID targetId = target.getUniqueId();
+										String targetIslandStatus = islandsFile
+												.getString("islands." + targetId + ".status");
 
-										if (islandsFile.getString("islands." + targetId) == null) {
+										if (targetIslandStatus == null)
 											MessageUtils.configStringMessage(sender,
-													"IslandCommand.admin_warp_command_error");
-											return false;
-										} else if (islandStatus.equalsIgnoreCase("current")) {
+													"IslandCommand.admin_warp_island_error");
+										else if (targetIslandStatus.equalsIgnoreCase("current")) {
 											xCoord = islandsFile.getDouble("islands." + targetId + ".location.x");
 											yCoord = islandsFile.getDouble("islands." + targetId + ".location.y");
 											zCoord = islandsFile.getDouble("islands." + targetId + ".location.z");
@@ -114,10 +118,12 @@ public class IslandCommand implements CommandExecutor, TabCompleter {
 											player.teleport(
 													world.getHighestBlockAt(islandLocation).getLocation().add(0, 1, 0));
 											MessageUtils.configStringMessage(sender, "IslandCommand.admin_warp_message",
-													"<target>", target.getDisplayName());
-										} else if (islandStatus.equalsIgnoreCase("deleted"))
+													"<target>",
+													(target.isOnline() ? Bukkit.getPlayer(targetName).getDisplayName()
+															: targetName));
+										} else
 											MessageUtils.configStringMessage(sender,
-													"IslandCommand.admin_warp_command_error");
+													"IslandCommand.admin_warp_island_error");
 									} else
 										MessageUtils.validPlayerError(sender);
 								}
@@ -148,12 +154,15 @@ public class IslandCommand implements CommandExecutor, TabCompleter {
 				completions.add("adminwarp");
 
 			return completions;
-		} else if (args.length == 2 && args[0].equalsIgnoreCase("adminwarp")) {
-			List<String> players = new ArrayList<>();
+		} else if (args.length == 2) {
+			List<String> storedUsers = new ArrayList<>();
 
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers())
-				players.add(onlinePlayer.getName());
-			return players;
+			for (String storedIsland : islandsFile.getConfigurationSection("islands").getKeys(false)) {
+				String storedIslandOwners = islandsFile.getString("islands." + storedIsland + ".owner");
+
+				storedUsers.add(storedIslandOwners);
+			}
+			return storedUsers;
 		}
 		return null;
 	}
