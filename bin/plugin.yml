@@ -1,5 +1,5 @@
 name: HS-SkyForge
-version: 2.0
+version: 2.1
 author: RySty
 main: mc.rysty.heliosphereskyforge.HelioSphereSkyForge
 sofdepend: [WorldEdit]
