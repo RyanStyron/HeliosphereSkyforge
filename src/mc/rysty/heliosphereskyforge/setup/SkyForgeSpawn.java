@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
 
@@ -25,13 +26,24 @@ public class SkyForgeSpawn implements Listener {
 	}
 
 	@EventHandler
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		Location location = player.getLocation();
+		World world = location.getWorld();
+
+		if (world.equals(Bukkit.getWorld("Skyforge")))
+			if (location.distanceSquared(world.getSpawnLocation()) <= 3000 && location.getY() < -50)
+				player.teleport(world.getSpawnLocation());
+	}
+
+	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
 		Entity entity = event.getEntity();
 		Location location = entity.getLocation();
 		World world = location.getWorld();
 
 		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 2500)
+			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
 				event.setCancelled(true);
 	}
 
@@ -49,7 +61,7 @@ public class SkyForgeSpawn implements Listener {
 			return;
 
 		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 2500)
+			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
 				if (player.getGameMode() != GameMode.CREATIVE)
 					event.setCancelled(true);
 	}
@@ -82,7 +94,7 @@ public class SkyForgeSpawn implements Listener {
 		World world = location.getWorld();
 
 		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 2500)
+			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
 				if (!player.getGameMode().equals(GameMode.CREATIVE) || !player.hasPermission("hs.skyforge.spawnbuild"))
 					if (eventName.equalsIgnoreCase("BlockBreakEvent"))
 						((BlockBreakEvent) event).setCancelled(true);
