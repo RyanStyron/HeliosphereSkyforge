@@ -6,9 +6,10 @@ import mc.rysty.heliosphereskyforge.commands.IslandCommand;
 import mc.rysty.heliosphereskyforge.island.IslandBlockEvents;
 import mc.rysty.heliosphereskyforge.modifications.CobbleGenerationModifier;
 import mc.rysty.heliosphereskyforge.setup.SkyForgeCommandWhitelist;
-import mc.rysty.heliosphereskyforge.setup.SkyForgeScoreboard;
+import mc.rysty.heliosphereskyforge.scoreboard.SkyForgeScoreboard;
 import mc.rysty.heliosphereskyforge.setup.SkyForgeSpawn;
 import mc.rysty.heliosphereskyforge.setup.UpdateIslandsYAML;
+import mc.rysty.heliosphereskyforge.utils.EconomyUtils;
 import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
 
 public class HelioSphereSkyForge extends JavaPlugin {
@@ -36,6 +37,10 @@ public class HelioSphereSkyForge extends JavaPlugin {
 		new SkyForgeSpawn(this);
 		new IslandBlockEvents(this);
 		new CobbleGenerationModifier(this);
+
+		/* Economy */
+		if (!EconomyUtils.setupEconomy())
+			EconomyUtils.economy = null;
 
 		System.out.println("HS-SkyForge enabled");
 	}

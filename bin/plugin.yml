@@ -2,7 +2,7 @@ name: HS-SkyForge
 version: 2.1
 author: RySty
 main: mc.rysty.heliosphereskyforge.HelioSphereSkyForge
-sofdepend: [WorldEdit]
+sofdepend: [WorldEdit, Vault]
 
 commands:
   island:

@@ -1,4 +1,4 @@
-package mc.rysty.heliosphereskyforge.setup;
+package mc.rysty.heliosphereskyforge.scoreboard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -22,7 +23,9 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
+import mc.rysty.heliosphereskyforge.utils.EconomyUtils;
 import mc.rysty.heliosphereskyforge.utils.IslandsFileManager;
+import mc.rysty.heliosphereskyforge.utils.JavaUtils;
 import mc.rysty.heliosphereskyforge.utils.MessageUtils;
 
 public class SkyForgeScoreboard implements Listener {
@@ -30,27 +33,28 @@ public class SkyForgeScoreboard implements Listener {
     private HelioSphereSkyForge plugin = HelioSphereSkyForge.getInstance();
     private IslandsFileManager islandsFileManager = HelioSphereSkyForge.islandsFileManager;
     private FileConfiguration islandsFile = islandsFileManager.getData();
+    private PluginManager pluginManager = plugin.getServer().getPluginManager();
 
     public SkyForgeScoreboard(HelioSphereSkyForge plugin) {
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        pluginManager.registerEvents(this, plugin);
     }
 
     private HashMap<UUID, Scoreboard> scoreboardMap = new HashMap<UUID, Scoreboard>();
     private HashMap<String, Location> islandsMap = new HashMap<String, Location>();
     private ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
     private String locationString;
-    private String lastLocationString = "";
+    private HashMap<UUID, String> lastLocationString = new HashMap<UUID, String>();
+    private String balanceString;
+    private HashMap<UUID, String> lastBalanceString = new HashMap<UUID, String>();
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
-        Location location = player.getLocation();
-        World world = location.getWorld();
+        World world = player.getWorld();
 
-        if (world.equals(Bukkit.getWorld("Skyforge"))) {
-            locationString = "Spawn";
-            updateSkyforgeScoreboard(player);
-        } else
+        if (world.equals(Bukkit.getWorld("Skyforge")))
+            updateSkyforgeScoreboardVariables(player);
+        else
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
     }
 
@@ -95,7 +99,7 @@ public class SkyForgeScoreboard implements Listener {
         Score huntingRank = objective.getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b " + ""));
         Score miningRank = objective.getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b " + ""));
         Score fillerLine3 = objective.getScore(MessageUtils.convertColorCodes("&f&f&3----------------------"));
-        Score balance = objective.getScore(MessageUtils.convertColorCodes("&fBalance&7:&b " + ""));
+        Score balance = objective.getScore(MessageUtils.convertColorCodes("&fBalance&7:&b " + balanceString));
         Score fillerLine4 = objective.getScore(MessageUtils.convertColorCodes("&f&f&f&3----------------------"));
 
         fillerLine.setScore(16);
@@ -114,7 +118,8 @@ public class SkyForgeScoreboard implements Listener {
         scoreboardMap.put(playerId, scoreboard);
         player.setScoreboard(scoreboard);
 
-        lastLocationString = locationString;
+        lastLocationString.put(playerId, locationString);
+        lastBalanceString.put(playerId, balanceString);
     }
 
     private void updateSkyforgeScoreboardVariables(Player player) {
@@ -123,6 +128,7 @@ public class SkyForgeScoreboard implements Listener {
         World world = location.getWorld();
 
         if (world.equals(Bukkit.getWorld("Skyforge"))) {
+            /* Location variable. */
             if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
                 locationString = "Spawn";
             else {
@@ -138,30 +144,45 @@ public class SkyForgeScoreboard implements Listener {
                 }
                 for (Location islandsMapValues : islandsMap.values())
                     if (location.distanceSquared(islandsMapValues) < 10000)
-                        locationString = getKey(islandsMap, islandsMapValues) + "'s &bIsland";
-
+                        locationString = JavaUtils.getHashMapKey(islandsMap, islandsMapValues) + "'s &bIsland";
                 if (locationString.contains(playerName))
                     locationString = "Your Island";
-
-                if (!locationString.endsWith("Island") && lastLocationString.equalsIgnoreCase("Spawn"))
-                    locationString = "Void";
             }
-            if (!locationString.equalsIgnoreCase(lastLocationString))
+            /* Balance variable. */
+            if (pluginManager.isPluginEnabled("Vault") && EconomyUtils.getEconomy() != null)
+                balanceString = "" + EconomyUtils.getPlayerBalance(player);
+            else
+                balanceString = "N/A";
+
+            /* Update scoreboard. */
+            if (skyforgeScoreboardValuesChanged(player))
                 updateSkyforgeScoreboard(player);
         }
+    }
+
+    private boolean skyforgeScoreboardValuesChanged(Player player) {
+        UUID playerId = player.getUniqueId();
+        String lastPlayerLocation = lastLocationString.get(playerId);
+        String lastPlayerBalance = lastBalanceString.get(playerId);
+
+        if (lastPlayerLocation == null)
+            lastPlayerLocation = "";
+        if (lastPlayerBalance == null)
+            lastPlayerBalance = "";
+
+        if (!lastPlayerLocation.equals(locationString) || !lastPlayerBalance.equals(balanceString))
+            return true;
+        return false;
     }
 
     private void animatedScoreboardTitle(Objective objective) {
         List<String> titles = new ArrayList<>();
 
+        titles.add(MessageUtils.convertColorCodes("&3&lSKYFORGE"));
         titles.add(MessageUtils.convertColorCodes("&b&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&6&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&1&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&7&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&4&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&5&lSKYFORGE"));
-        titles.add(MessageUtils.convertColorCodes("&c&lSKYFORGE"));
+        titles.add(MessageUtils.convertColorCodes("&f&lSKYFORGE"));
         titles.add(MessageUtils.convertColorCodes("&b&lSKYFORGE"));
+        titles.add(MessageUtils.convertColorCodes("&3&lSKYFORGE"));
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             int integer = 0;
@@ -174,13 +195,6 @@ public class SkyForgeScoreboard implements Listener {
                     objective.setDisplayName(titles.get(integer));
                 integer++;
             }
-        }, 0, 30);
-    }
-
-    private <K, V> K getKey(HashMap<K, V> map, V value) {
-        for (HashMap.Entry<K, V> entry : map.entrySet())
-            if (value.equals(entry.getValue()))
-                return entry.getKey();
-        return null;
+        }, 0, 5);
     }
 }
