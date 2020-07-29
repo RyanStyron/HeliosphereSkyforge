@@ -43,18 +43,32 @@ public class SkyForgeScoreboard implements Listener {
     private HashMap<String, Location> islandsMap = new HashMap<String, Location>();
     private ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
     private String locationString;
-    private HashMap<UUID, String> lastLocationString = new HashMap<UUID, String>();
+    private HashMap<UUID, String> lastLocationMap = new HashMap<UUID, String>();
     private String balanceString;
-    private HashMap<UUID, String> lastBalanceString = new HashMap<UUID, String>();
+    private HashMap<UUID, String> lastBalanceMap = new HashMap<UUID, String>();
+    private String dungeonRankString;
+    private HashMap<UUID, String> lastDungeonRankMap = new HashMap<UUID, String>();
+    private String farmingRankString;
+    private HashMap<UUID, String> lastFarmingRankMap = new HashMap<UUID, String>();
+    private String fishingRankString;
+    private HashMap<UUID, String> lastFishingRankMap = new HashMap<UUID, String>();
+    private String huntingRankString;
+    private HashMap<UUID, String> lastHuntingRankMap = new HashMap<UUID, String>();
+    private String miningRankString;
+    private HashMap<UUID, String> lastMiningRankMap = new HashMap<UUID, String>();
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
+        UUID playerId = player.getUniqueId();
         World world = player.getWorld();
 
-        if (world.equals(Bukkit.getWorld("Skyforge")))
+        if (world.equals(Bukkit.getWorld("Skyforge"))) {
+            lastLocationMap.put(playerId, "");
+            lastBalanceMap.put(playerId, "");
+
             updateSkyforgeScoreboardVariables(player);
-        else
+        } else
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
     }
 
@@ -93,11 +107,15 @@ public class SkyForgeScoreboard implements Listener {
         Score locationLine = objective.getScore(MessageUtils.convertColorCodes("&fLocation&7:"));
         Score locationScore = objective.getScore(MessageUtils.convertColorCodes("&b" + locationString));
         Score fillerLine2 = objective.getScore(MessageUtils.convertColorCodes("&f&3----------------------"));
-        Score dungeonRank = objective.getScore(MessageUtils.convertColorCodes("&fDungeon Rank&7:&b " + ""));
-        Score farmingRank = objective.getScore(MessageUtils.convertColorCodes("&fFarming Rank&7:&b " + ""));
-        Score fishingRank = objective.getScore(MessageUtils.convertColorCodes("&fFishing Rank&7:&b " + ""));
-        Score huntingRank = objective.getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b " + ""));
-        Score miningRank = objective.getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b " + ""));
+        Score dungeonRank = objective
+                .getScore(MessageUtils.convertColorCodes("&fDungeon Rank&7:&b " + dungeonRankString));
+        Score farmingRank = objective
+                .getScore(MessageUtils.convertColorCodes("&fFarming Rank&7:&b " + farmingRankString));
+        Score fishingRank = objective
+                .getScore(MessageUtils.convertColorCodes("&fFishing Rank&7:&b " + fishingRankString));
+        Score huntingRank = objective
+                .getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b " + huntingRankString));
+        Score miningRank = objective.getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b " + miningRankString));
         Score fillerLine3 = objective.getScore(MessageUtils.convertColorCodes("&f&f&3----------------------"));
         Score balance = objective.getScore(MessageUtils.convertColorCodes("&fBalance&7:&b " + balanceString));
         Score fillerLine4 = objective.getScore(MessageUtils.convertColorCodes("&f&f&f&3----------------------"));
@@ -118,8 +136,13 @@ public class SkyForgeScoreboard implements Listener {
         scoreboardMap.put(playerId, scoreboard);
         player.setScoreboard(scoreboard);
 
-        lastLocationString.put(playerId, locationString);
-        lastBalanceString.put(playerId, balanceString);
+        lastLocationMap.put(playerId, locationString);
+        lastBalanceMap.put(playerId, balanceString);
+        lastDungeonRankMap.put(playerId, dungeonRankString);
+        lastFarmingRankMap.put(playerId, farmingRankString);
+        lastFishingRankMap.put(playerId, fishingRankString);
+        lastHuntingRankMap.put(playerId, huntingRankString);
+        lastMiningRankMap.put(playerId, miningRankString);
     }
 
     private void updateSkyforgeScoreboardVariables(Player player) {
@@ -154,6 +177,13 @@ public class SkyForgeScoreboard implements Listener {
             else
                 balanceString = "N/A";
 
+            /* Skyforge Ranks variables. */
+            dungeonRankString = "" + SkyForgeScoreboardRanks.getSkyforgeDungeonRank(player);
+            farmingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeFarmingRank(player);
+            fishingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeFishingRank(player);
+            huntingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeHuntingRank(player);
+            miningRankString = "" + SkyForgeScoreboardRanks.getSkyforgeMiningRank(player);
+
             /* Update scoreboard. */
             if (skyforgeScoreboardValuesChanged(player))
                 updateSkyforgeScoreboard(player);
@@ -162,15 +192,24 @@ public class SkyForgeScoreboard implements Listener {
 
     private boolean skyforgeScoreboardValuesChanged(Player player) {
         UUID playerId = player.getUniqueId();
-        String lastPlayerLocation = lastLocationString.get(playerId);
-        String lastPlayerBalance = lastBalanceString.get(playerId);
+        String lastPlayerLocation = lastLocationMap.get(playerId);
+        String lastPlayerBalance = lastBalanceMap.get(playerId);
+        String lastPlayerDungeonRank = lastDungeonRankMap.get(playerId);
+        String lastPlayerFarmingRank = lastFarmingRankMap.get(playerId);
+        String lastPlayerFishingRank = lastFishingRankMap.get(playerId);
+        String lastPlayerHuntingRank = lastHuntingRankMap.get(playerId);
+        String lastPlayerMiningRank = lastMiningRankMap.get(playerId);
 
         if (lastPlayerLocation == null)
             lastPlayerLocation = "";
         if (lastPlayerBalance == null)
             lastPlayerBalance = "";
+        /* The ranks do not need a null check because they are set to one by default. */
 
-        if (!lastPlayerLocation.equals(locationString) || !lastPlayerBalance.equals(balanceString))
+        if (!lastPlayerLocation.equals(locationString) || !lastPlayerBalance.equals(balanceString)
+                || !lastPlayerDungeonRank.equals(dungeonRankString) || !lastPlayerFarmingRank.equals(farmingRankString)
+                || !lastPlayerFishingRank.equals(fishingRankString) || !lastPlayerHuntingRank.equals(huntingRankString)
+                || !lastPlayerMiningRank.equals(miningRankString))
             return true;
         return false;
     }
