@@ -110,12 +110,13 @@ public class SkyForgeScoreboard implements Listener {
         Score dungeonRank = objective
                 .getScore(MessageUtils.convertColorCodes("&fDungeon Rank&7:&b " + dungeonRankString));
         Score farmingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fFarming Rank&7:&b " + farmingRankString));
+                .getScore(MessageUtils.convertColorCodes("&fFarming Rank&7:&b  " + farmingRankString));
         Score fishingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fFishing Rank&7:&b " + fishingRankString));
+                .getScore(MessageUtils.convertColorCodes("&fFishing Rank&7:&b   " + fishingRankString));
         Score huntingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b " + huntingRankString));
-        Score miningRank = objective.getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b " + miningRankString));
+                .getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b  " + huntingRankString));
+        Score miningRank = objective
+                .getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b    " + miningRankString));
         Score fillerLine3 = objective.getScore(MessageUtils.convertColorCodes("&f&f&3----------------------"));
         Score balance = objective.getScore(MessageUtils.convertColorCodes("&fBalance&7:&b " + balanceString));
         Score fillerLine4 = objective.getScore(MessageUtils.convertColorCodes("&f&f&f&3----------------------"));
@@ -178,11 +179,11 @@ public class SkyForgeScoreboard implements Listener {
                 balanceString = "N/A";
 
             /* Skyforge Ranks variables. */
-            dungeonRankString = "" + SkyForgeScoreboardRanks.getSkyforgeDungeonRank(player);
-            farmingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeFarmingRank(player);
-            fishingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeFishingRank(player);
-            huntingRankString = "" + SkyForgeScoreboardRanks.getSkyforgeHuntingRank(player);
-            miningRankString = "" + SkyForgeScoreboardRanks.getSkyforgeMiningRank(player);
+            dungeonRankString = SkyForgeScoreboardRanks.getSkyforgeDungeonRank(player);
+            farmingRankString = SkyForgeScoreboardRanks.getSkyforgeFarmingRank(player);
+            fishingRankString = SkyForgeScoreboardRanks.getSkyforgeFishingRank(player);
+            huntingRankString = SkyForgeScoreboardRanks.getSkyforgeHuntingRank(player);
+            miningRankString = SkyForgeScoreboardRanks.getSkyforgeMiningRank(player);
 
             /* Update scoreboard. */
             if (skyforgeScoreboardValuesChanged(player))
