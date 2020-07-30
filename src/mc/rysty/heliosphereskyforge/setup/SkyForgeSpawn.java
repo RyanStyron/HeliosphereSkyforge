@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
 
@@ -23,17 +22,6 @@ public class SkyForgeSpawn implements Listener {
 
 	public SkyForgeSpawn(HelioSphereSkyForge plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
-
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-		Location location = player.getLocation();
-		World world = location.getWorld();
-
-		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 3000 && location.getY() < -50)
-				player.teleport(world.getSpawnLocation());
 	}
 
 	@EventHandler
