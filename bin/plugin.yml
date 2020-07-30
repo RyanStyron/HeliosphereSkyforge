@@ -3,6 +3,7 @@ version: 2.1
 author: RySty
 main: mc.rysty.heliosphereskyforge.HelioSphereSkyForge
 sofdepend: [WorldEdit, Vault]
+api-version: 1.16
 
 commands:
   island:
