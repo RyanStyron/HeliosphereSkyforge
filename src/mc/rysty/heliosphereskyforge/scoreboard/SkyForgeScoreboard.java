@@ -68,8 +68,8 @@ public class SkyForgeScoreboard implements Listener {
             lastBalanceMap.put(playerId, "");
 
             updateSkyforgeScoreboardVariables(player);
-        } else
-            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        } else if (!world.equals(Bukkit.getWorld("Moshpit")))
+            player.setScoreboard(scoreboardManager.getNewScoreboard());
     }
 
     @EventHandler
