@@ -13,8 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -67,23 +65,14 @@ public class SkyForgeScoreboard implements Listener {
             lastLocationMap.put(playerId, "");
             lastBalanceMap.put(playerId, "");
 
-            updateSkyforgeScoreboardVariables(player);
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    updateSkyforgeScoreboardVariables(player);
+                }
+            }, 0, 20);
         } else if (!world.equals(Bukkit.getWorld("Moshpit")))
             player.setScoreboard(scoreboardManager.getNewScoreboard());
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        updateSkyforgeScoreboardVariables(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        Location toLocation = event.getTo();
-        Location fromLocation = event.getFrom();
-
-        if (toLocation.getWorld() == fromLocation.getWorld())
-            updateSkyforgeScoreboardVariables(event.getPlayer());
     }
 
     @SuppressWarnings("deprecation")
