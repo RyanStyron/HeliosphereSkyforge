@@ -35,6 +35,7 @@ public class SkyForgeScoreboard implements Listener {
 
     public SkyForgeScoreboard(HelioSphereSkyForge plugin) {
         pluginManager.registerEvents(this, plugin);
+        skyforgeScoreboardScheduler();
     }
 
     private HashMap<UUID, Scoreboard> scoreboardMap = new HashMap<UUID, Scoreboard>();
@@ -44,16 +45,6 @@ public class SkyForgeScoreboard implements Listener {
     private HashMap<UUID, String> lastLocationMap = new HashMap<UUID, String>();
     private String balanceString;
     private HashMap<UUID, String> lastBalanceMap = new HashMap<UUID, String>();
-    private String dungeonRankString;
-    private HashMap<UUID, String> lastDungeonRankMap = new HashMap<UUID, String>();
-    private String farmingRankString;
-    private HashMap<UUID, String> lastFarmingRankMap = new HashMap<UUID, String>();
-    private String fishingRankString;
-    private HashMap<UUID, String> lastFishingRankMap = new HashMap<UUID, String>();
-    private String huntingRankString;
-    private HashMap<UUID, String> lastHuntingRankMap = new HashMap<UUID, String>();
-    private String miningRankString;
-    private HashMap<UUID, String> lastMiningRankMap = new HashMap<UUID, String>();
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
@@ -64,18 +55,23 @@ public class SkyForgeScoreboard implements Listener {
         if (world.equals(Bukkit.getWorld("Skyforge"))) {
             lastLocationMap.put(playerId, "");
             lastBalanceMap.put(playerId, "");
-
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    updateSkyforgeScoreboardVariables(player);
-                }
-            }, 0, 20);
         } else if (!world.equals(Bukkit.getWorld("Moshpit")))
             player.setScoreboard(scoreboardManager.getNewScoreboard());
     }
 
-    @SuppressWarnings("deprecation")
+    private void skyforgeScoreboardScheduler() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getWorld() == Bukkit.getWorld("Skyforge")) {
+                Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        updateSkyforgeScoreboardVariables(player);
+                    }
+                }, 0, 20);
+            }
+        }
+    }
+
     private void updateSkyforgeScoreboard(Player player) {
         UUID playerId = player.getUniqueId();
 
@@ -88,51 +84,29 @@ public class SkyForgeScoreboard implements Listener {
 
         if (objective != null)
             objective.unregister();
-        objective = scoreboard.registerNewObjective("Skyforge", "dummy");
+        objective = scoreboard.registerNewObjective("Skyforge", "dummy", "Skyforge");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         animatedScoreboardTitle(objective);
 
         Score fillerLine = objective.getScore(MessageUtils.convertColorCodes("&3----------------------"));
         Score locationLine = objective.getScore(MessageUtils.convertColorCodes("&fLocation&7:"));
         Score locationScore = objective.getScore(MessageUtils.convertColorCodes("&b" + locationString));
-        Score fillerLine2 = objective.getScore(MessageUtils.convertColorCodes("&f&3----------------------"));
-        Score dungeonRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fDungeon Rank&7:&b " + dungeonRankString));
-        Score farmingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fFarming Rank&7:&b  " + farmingRankString));
-        Score fishingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fFishing Rank&7:&b   " + fishingRankString));
-        Score huntingRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fHunting Rank&7:&b  " + huntingRankString));
-        Score miningRank = objective
-                .getScore(MessageUtils.convertColorCodes("&fMining Rank&7:&b    " + miningRankString));
-        Score fillerLine3 = objective.getScore(MessageUtils.convertColorCodes("&f&f&3----------------------"));
-        Score balance = objective.getScore(MessageUtils.convertColorCodes("&fBalance&7:&b " + balanceString));
-        Score fillerLine4 = objective.getScore(MessageUtils.convertColorCodes("&f&f&f&3----------------------"));
+        Score fillerLine2 = objective.getScore(MessageUtils.convertColorCodes("&f&f&3----------------------"));
+        Score balance = objective.getScore(MessageUtils.convertColorCodes("&fCoins&7:&6 " + balanceString));
+        Score fillerLine3 = objective.getScore(MessageUtils.convertColorCodes("&f&f&f&3----------------------"));
 
-        fillerLine.setScore(16);
-        locationLine.setScore(15);
-        locationScore.setScore(14);
-        fillerLine2.setScore(13);
-        dungeonRank.setScore(12);
-        farmingRank.setScore(11);
-        fishingRank.setScore(10);
-        huntingRank.setScore(9);
-        miningRank.setScore(8);
-        fillerLine3.setScore(7);
-        balance.setScore(6);
-        fillerLine4.setScore(5);
+        fillerLine.setScore(5);
+        locationLine.setScore(4);
+        locationScore.setScore(3);
+        fillerLine2.setScore(2);
+        balance.setScore(1);
+        fillerLine3.setScore(0);
 
         scoreboardMap.put(playerId, scoreboard);
         player.setScoreboard(scoreboard);
 
         lastLocationMap.put(playerId, locationString);
         lastBalanceMap.put(playerId, balanceString);
-        lastDungeonRankMap.put(playerId, dungeonRankString);
-        lastFarmingRankMap.put(playerId, farmingRankString);
-        lastFishingRankMap.put(playerId, fishingRankString);
-        lastHuntingRankMap.put(playerId, huntingRankString);
-        lastMiningRankMap.put(playerId, miningRankString);
     }
 
     private void updateSkyforgeScoreboardVariables(Player player) {
@@ -167,13 +141,6 @@ public class SkyForgeScoreboard implements Listener {
             else
                 balanceString = "N/A";
 
-            /* Skyforge Ranks variables. */
-            dungeonRankString = SkyForgeScoreboardRanks.getSkyforgeDungeonRank(player);
-            farmingRankString = SkyForgeScoreboardRanks.getSkyforgeFarmingRank(player);
-            fishingRankString = SkyForgeScoreboardRanks.getSkyforgeFishingRank(player);
-            huntingRankString = SkyForgeScoreboardRanks.getSkyforgeHuntingRank(player);
-            miningRankString = SkyForgeScoreboardRanks.getSkyforgeMiningRank(player);
-
             /* Update scoreboard. */
             if (skyforgeScoreboardValuesChanged(player))
                 updateSkyforgeScoreboard(player);
@@ -184,22 +151,13 @@ public class SkyForgeScoreboard implements Listener {
         UUID playerId = player.getUniqueId();
         String lastPlayerLocation = lastLocationMap.get(playerId);
         String lastPlayerBalance = lastBalanceMap.get(playerId);
-        String lastPlayerDungeonRank = lastDungeonRankMap.get(playerId);
-        String lastPlayerFarmingRank = lastFarmingRankMap.get(playerId);
-        String lastPlayerFishingRank = lastFishingRankMap.get(playerId);
-        String lastPlayerHuntingRank = lastHuntingRankMap.get(playerId);
-        String lastPlayerMiningRank = lastMiningRankMap.get(playerId);
 
         if (lastPlayerLocation == null)
             lastPlayerLocation = "";
         if (lastPlayerBalance == null)
             lastPlayerBalance = "";
-        /* The ranks do not need a null check because they are set to one by default. */
 
-        if (!lastPlayerLocation.equals(locationString) || !lastPlayerBalance.equals(balanceString)
-                || !lastPlayerDungeonRank.equals(dungeonRankString) || !lastPlayerFarmingRank.equals(farmingRankString)
-                || !lastPlayerFishingRank.equals(fishingRankString) || !lastPlayerHuntingRank.equals(huntingRankString)
-                || !lastPlayerMiningRank.equals(miningRankString))
+        if (!lastPlayerLocation.equals(locationString) || !lastPlayerBalance.equals(balanceString))
             return true;
         return false;
     }
