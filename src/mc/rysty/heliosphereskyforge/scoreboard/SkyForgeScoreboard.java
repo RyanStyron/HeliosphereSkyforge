@@ -52,24 +52,27 @@ public class SkyForgeScoreboard implements Listener {
         UUID playerId = player.getUniqueId();
         World world = player.getWorld();
 
+        lastLocationMap.put(playerId, null);
+        lastBalanceMap.put(playerId, null);
+
         if (world.equals(Bukkit.getWorld("Skyforge"))) {
-            lastLocationMap.put(playerId, "");
-            lastBalanceMap.put(playerId, "");
+            lastLocationMap.put(playerId, null);
+            lastBalanceMap.put(playerId, null);
         } else if (!world.equals(Bukkit.getWorld("Moshpit")))
             player.setScoreboard(scoreboardManager.getNewScoreboard());
     }
 
     private void skyforgeScoreboardScheduler() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getWorld() == Bukkit.getWorld("Skyforge")) {
-                Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-                    @Override
-                    public void run() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getWorld() == Bukkit.getWorld("Skyforge")) {
                         updateSkyforgeScoreboardVariables(player);
                     }
-                }, 0, 20);
+                }
             }
-        }
+        }, 0, 20);
     }
 
     private void updateSkyforgeScoreboard(Player player) {
@@ -116,7 +119,7 @@ public class SkyForgeScoreboard implements Listener {
 
         if (world.equals(Bukkit.getWorld("Skyforge"))) {
             /* Location variable. */
-            if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
+            if (location.distanceSquared(world.getSpawnLocation()) <= 10000)
                 locationString = "Spawn";
             else {
                 for (String storedIsland : islandsFile.getConfigurationSection("islands").getKeys(false)) {
