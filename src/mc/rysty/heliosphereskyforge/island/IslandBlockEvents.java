@@ -61,14 +61,14 @@ public class IslandBlockEvents implements Listener {
 				Location islandLocation = new Location(world, islandXCoord, islandYCoord, islandZCoord);
 
 				if (location.distanceSquared(islandLocation) >= 10000) {
-					if (location.distanceSquared(world.getSpawnLocation()) >= 2500) {
+					if (location.distanceSquared(world.getSpawnLocation()) > 10000) {
 						if (!player.hasPermission("hs.skyforge.modifyIslandOther")) {
 							MessageUtils.configStringMessage(player, "no_block_modify");
 							cancelEvent(event);
 						}
 					}
 				}
-			} else if (location.distanceSquared(world.getSpawnLocation()) >= 2500) {
+			} else if (location.distanceSquared(world.getSpawnLocation()) > 10000) {
 				if (!player.hasPermission("hs.skyforge.modifyIslandOther")) {
 					MessageUtils.configStringMessage(player, "no_block_modify");
 					cancelEvent(event);

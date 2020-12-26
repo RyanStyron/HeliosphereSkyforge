@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import mc.rysty.heliosphereskyforge.HelioSphereSkyForge;
@@ -30,9 +31,15 @@ public class SkyForgeSpawn implements Listener {
 		Location location = entity.getLocation();
 		World world = location.getWorld();
 
-		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
-				event.setCancelled(true);
+		if (world == Bukkit.getWorld("Skyforge")) {
+			if (entity instanceof Player) {
+				if (event.getCause() == DamageCause.VOID)
+					entity.teleport(world.getSpawnLocation());
+
+				if (location.distanceSquared(world.getSpawnLocation()) <= 10000)
+					event.setCancelled(true);
+			}
+		}
 	}
 
 	@EventHandler
@@ -49,7 +56,7 @@ public class SkyForgeSpawn implements Listener {
 			return;
 
 		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
+			if (location.distanceSquared(world.getSpawnLocation()) <= 10000)
 				if (player.getGameMode() != GameMode.CREATIVE)
 					event.setCancelled(true);
 	}
@@ -82,7 +89,7 @@ public class SkyForgeSpawn implements Listener {
 		World world = location.getWorld();
 
 		if (world.equals(Bukkit.getWorld("Skyforge")))
-			if (location.distanceSquared(world.getSpawnLocation()) <= 3000)
+			if (location.distanceSquared(world.getSpawnLocation()) <= 10000)
 				if (!player.getGameMode().equals(GameMode.CREATIVE) || !player.hasPermission("hs.skyforge.spawnbuild"))
 					if (eventName.equalsIgnoreCase("BlockBreakEvent"))
 						((BlockBreakEvent) event).setCancelled(true);
